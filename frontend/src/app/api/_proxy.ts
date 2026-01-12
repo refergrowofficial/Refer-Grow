@@ -8,12 +8,28 @@ function normalizeBase(base: string) {
 
 function backendBaseUrl() {
   // Prefer a server-only env var if provided, fallback to the public one.
-  const raw = process.env.BACKEND_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
-  return normalizeBase(raw);
+  // NOTE: Defaulting to localhost is convenient in dev, but breaks in Netlify/production.
+  const raw = process.env.BACKEND_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (raw) return normalizeBase(raw);
+
+  if (process.env.NODE_ENV !== "production") {
+    return "http://localhost:4000";
+  }
+
+  return null;
 }
 
 async function proxy(req: NextRequest) {
   const base = backendBaseUrl();
+  if (!base) {
+    return NextResponse.json(
+      {
+        error:
+          "Missing BACKEND_API_BASE_URL. Set it in your Netlify site environment variables to your deployed backend (e.g. https://api.example.com).",
+      },
+      { status: 500 }
+    );
+  }
   const url = `${base}${req.nextUrl.pathname}${req.nextUrl.search}`;
 
   const headers = new Headers(req.headers);

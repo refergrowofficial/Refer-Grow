@@ -42,6 +42,16 @@ npm run dev
 
 Open http://localhost:3000
 
+## Deploy (Netlify)
+
+This repo is a monorepo (`backend/` + `frontend/`). Netlify must build from the `frontend/` folder and use the Next.js runtime.
+
+Required environment variables in your Netlify site:
+
+- `BACKEND_API_BASE_URL`: the publicly reachable URL of your deployed backend (for example `https://api.example.com`).
+
+Without this, the Next.js API proxy routes under `/api/*` cannot reach your backend in production.
+
 ## One-time admin bootstrap
 
 Create the first admin (only works if no admin exists):
